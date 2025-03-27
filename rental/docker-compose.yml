@@ -1,0 +1,41 @@
+version: '3.8'  # Версия Docker Compose
+
+services:
+  # Сервис для PostgreSQL
+  postgres:
+    image: postgres:latest  # Используем официальный образ PostgreSQL
+    container_name: postgres  # Имя контейнера
+    environment:
+      POSTGRES_USER: postgres  # Имя пользователя
+      POSTGRES_PASSWORD: 12240713  # Пароль
+      POSTGRES_DB: rental_db  # Имя базы данных
+    ports:
+      - "5432:5432"  # Пробрасываем порт 5432 на хост
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Том для хранения данных PostgreSQL
+    networks:
+      - app_network  # Подключаем к сети
+
+  # Сервис для вашего приложения
+  app:
+    build: .  # Собираем образ из Dockerfile в текущей директории
+    container_name: app  # Имя контейнера
+    depends_on:
+      - postgres  # Зависимость от сервиса postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/rental_db  # URL базы данных
+      SPRING_DATASOURCE_USERNAME: postgres  # Имя пользователя
+      SPRING_DATASOURCE_PASSWORD: 12240713  # Пароль
+    ports:
+      - "8255:8255"  # Пробрасываем порт 8255 на хост
+    networks:
+      - app_network  # Подключаем к сети
+
+# Определяем тома
+volumes:
+  postgres_data:  # Том для хранения данных PostgreSQL
+
+# Определяем сети
+networks:
+  app_network:  # Сеть для связи между контейнерами
+    driver: bridge
