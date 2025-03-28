@@ -1,0 +1,77 @@
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+
+        # Логин маршрут
+        - id: login-route
+          uri: "lb://SECURITY"
+          predicates:
+            - Path=/api/security/**
+
+        # Oauth маршрут
+        - id: oauth-route
+          uri: "lb://SECURITY"
+          predicates:
+            - Path=/login/oauth2/code/**
+
+        # Маршрут rental
+        - id: users-route
+          uri: "lb://RENTAL"
+          filters:
+            - name: JWTGatewayFilter
+          predicates:
+            - Path=/api/rental/**
+
+        # Маршрут файлов
+        - id: file-route
+          uri: "lb://FILE-SERVICE"
+          filters:
+            - name: JWTGatewayFilter
+          predicates:
+            - Path=/api/files/**
+
+        # Маршрут рейтинга
+        - id: chat-route
+          uri: "lb://Ratings-service"
+          filters:
+            - name: JWTGatewayFilter
+          predicates:
+            - Path=/api/ratings/**
+
+        # Маршрут ренировок
+        - id: trainings-route
+          uri: "lb://TRAININGS-SERVICE"
+          filters:
+            - name: JWTGatewayFilter
+          predicates:
+            - Path=/api/trainings/**
+
+jwt:
+  secret: "F+pGPpO3Mk3Wf4Q76L6CtPa2tWJYHDJrVZlqTySuYBUTGwoKkyc4ofn/3rlwaPVg"
+
+server:
+  port: 8766
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: TRACE
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.security: TRACE
+    com.example.api_geteway: TRACE
+    org.springframework.web.cors: TRACE
+    com.example.api_geteway.component: DEBUG
